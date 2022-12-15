@@ -28,6 +28,7 @@ def install_sentence_transformers():
     save_zip("sentence_transformers_lib.zip", "python", bucket)
     save_zip("msmarco-distilbert-cos-v5-model.zip", "model", bucket)
 
+# Todo: Create standalone lambdas to install package and model, also for removing/updating
 # Note: uncomment to install
 # install_sentence_transformers()
 
