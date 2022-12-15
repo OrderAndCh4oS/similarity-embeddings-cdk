@@ -1,67 +1,68 @@
 import * as cdk from 'aws-cdk-lib';
+import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as efs from 'aws-cdk-lib/aws-efs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import {ThroughputMode} from 'aws-cdk-lib/aws-efs';
 import {Construct} from 'constructs';
-import {Architecture} from "aws-cdk-lib/aws-lambda";
-import {Duration, RemovalPolicy} from "aws-cdk-lib";
 import * as path from "path";
+import {Duration} from "aws-cdk-lib";
 
 export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
-    const vpc = new ec2.Vpc(this, 'VPC', {
-      maxAzs: 2
-    });
+    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+        super(scope, id, props);
 
-    const efsSecurityGroup = new ec2.SecurityGroup(this, 'EfsSimilarityEmbeddingSecurityGroup', {
-      vpc
-    });
+        const bucket = new s3.Bucket(this, 'SimilarityEmbeddingsBucket', {
+            bucketName: 'similarity-embeddings',
+        });
 
-    const fs = new efs.FileSystem(this, 'EfsSimilarityEmbeddingFileSystem', {
-      vpc: vpc,
-      performanceMode: efs.PerformanceMode.GENERAL_PURPOSE,
-      throughputMode: ThroughputMode.BURSTING,
-      removalPolicy: RemovalPolicy.DESTROY,
-      securityGroup: efsSecurityGroup
-    });
+        const vpc = new ec2.Vpc(this, 'VPC', {
+            maxAzs: 2
+        });
 
-    const accessPoint = fs.addAccessPoint('LambdaAccessPoint', {
-      path: '/export/lambda',
-      createAcl: {
-        ownerGid: '1001',
-        ownerUid: '1001',
-        permissions: '755',
-      },
-      posixUser: {
-        uid: '1001',
-        gid: '1001',
-      }
-    });
+        const efsSecurityGroup = new ec2.SecurityGroup(this, 'SimilarityEfsEmbeddingSecurityGroup', {
+            vpc
+        });
 
-    const lambdaSecurityGroup = new ec2.SecurityGroup(this, 'SimilarityEmbeddingLambdaSecurityGroup', {
-      vpc
-    });
+        const fs = new efs.FileSystem(this, 'EfsSimilarityEmbedding', {
+            vpc: vpc,
+            performanceMode: efs.PerformanceMode.GENERAL_PURPOSE,
+            throughputMode: efs.ThroughputMode.BURSTING,
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+            securityGroup: efsSecurityGroup
+        });
 
-    const createEmbeddingHandler = new lambda.DockerImageFunction(this, 'CreateEmbeddingLambdaFunction', {
-      code: lambda.DockerImageCode.fromImageAsset(
-          path.join(__dirname, '../lambdas'),
-          {
-            cmd: ["create_embedding.index.handler"]
-          }
-      ),
-      memorySize: 1024,
-      timeout: Duration.seconds(10),
-      architecture: Architecture.ARM_64,
-      securityGroups: [lambdaSecurityGroup],
-      filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
-      vpc,
-      // Todo: could store to the redis cache on creation…
-      // environment: {
-      //   CACHE_HOST: redisCache.attrRedisEndpointAddress,
-      //   CACHE_PORT: redisCache.attrRedisEndpointPort
-      // },
-    });
-  }
+        const accessPoint = fs.addAccessPoint('SimilarityEmbeddingLambdaAccessPoint', {
+            path: '/sentence_transformers',
+            createAcl: {
+                ownerGid: '1001',
+                ownerUid: '1001',
+                permissions: '755',
+            },
+            posixUser: {
+                uid: '1001',
+                gid: '1001',
+            }
+        });
+
+        const lambdaSecurityGroup = new ec2.SecurityGroup(this, 'SimilarityEmbeddingLambdaSecurityGroup', {
+            vpc
+        });
+
+        const createEmbeddingHandler = new lambda.DockerImageFunction(this, 'CreateEmbeddingLambdaSimilarityEmbedding', {
+            code: lambda.DockerImageCode.fromImageAsset(
+                path.join(__dirname, '../lambdas'),
+                {
+                    cmd: ["create_embedding.index.handler"]
+                }
+            ),
+            memorySize: 2048,
+            timeout: Duration.minutes(15),
+            architecture: lambda.Architecture.ARM_64,
+            securityGroups: [lambdaSecurityGroup],
+            filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
+            vpc,
+        });
+
+        bucket.grantRead(createEmbeddingHandler);
+    }
 }
