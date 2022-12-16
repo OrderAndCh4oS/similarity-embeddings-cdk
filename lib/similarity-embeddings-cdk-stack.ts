@@ -7,6 +7,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import {Code, Runtime} from 'aws-cdk-lib/aws-lambda';
 import {Construct} from 'constructs';
 import * as path from "path";
+import {Cors, LambdaIntegration, RestApi} from "aws-cdk-lib/aws-apigateway";
 
 export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -76,5 +77,16 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
             filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
             vpc
         });
+
+        const api = new RestApi(this, 'AnnCache_Api', {
+            defaultCorsPreflightOptions: {
+                allowHeaders: Cors.DEFAULT_HEADERS,
+                allowMethods: Cors.ALL_METHODS,
+                allowOrigins: Cors.ALL_ORIGINS
+            },
+        });
+
+        const createEmbeddingResource = api.root.addResource('create-embedding');
+        createEmbeddingResource.addMethod('post', new LambdaIntegration(createEmbeddingHandler));
     }
 }

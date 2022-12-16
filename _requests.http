@@ -1,0 +1,8 @@
+POST https://ekaqal83p8.execute-api.eu-west-1.amazonaws.com/prod/create-embedding
+Content-Type: application/json
+
+{
+  "text": "I'm so, so tired and peaceful until"
+}
+
+###
