@@ -11,14 +11,14 @@ sys.path.append(python_pkg_path)
 
 from sentence_transformers import SentenceTransformer, util
 
-model = SentenceTransformer(f'{path}/models/msmarco-distilbert-cos-v5-model')
+model = SentenceTransformer(f'{path}/models/multi-qa-mpnet-base-cos-v1')
 
 def handler(event, context):
     body = json.loads(event["body"])
 
     errors = []
-    if not body["text"]:
-        errors.append('Missing text parameter')
+    if not body["texts"]:
+        errors.append('Missing texts parameter')
 
     if(len(errors)):
         return {
@@ -26,9 +26,11 @@ def handler(event, context):
            "body": json.dumps(errors)
        }
 
-    embedding = model.encode(body["text"])
+    embeddings = []
+    for text in body["texts"]:
+        embeddings.append(model.encode(text))
 
     return {
         "statusCode": 200,
-        "body": json.dumps({"embedding": embedding.tolist()})
+        "body": json.dumps({"embeddings": [embedding.tolist() for embedding in embeddings]})
     }
