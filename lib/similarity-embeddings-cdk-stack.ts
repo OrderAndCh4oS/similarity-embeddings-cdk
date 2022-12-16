@@ -1,22 +1,37 @@
 import * as cdk from 'aws-cdk-lib';
-import * as s3 from 'aws-cdk-lib/aws-s3';
+import {Duration} from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import {AmazonLinuxCpuType, AmazonLinuxGeneration, InstanceClass, InstanceSize, SubnetType} from 'aws-cdk-lib/aws-ec2';
 import * as efs from 'aws-cdk-lib/aws-efs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import {Code, Runtime} from 'aws-cdk-lib/aws-lambda';
 import {Construct} from 'constructs';
 import * as path from "path";
-import {Duration} from "aws-cdk-lib";
 
 export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const bucket = new s3.Bucket(this, 'SimilarityEmbeddingsBucket', {
-            bucketName: 'similarity-embeddings',
+        const vpc = new ec2.Vpc(this, 'VPC', {
+            availabilityZones: ['eu-west-1b']
         });
 
-        const vpc = new ec2.Vpc(this, 'VPC', {
-            maxAzs: 2
+        const security_group = new ec2.SecurityGroup(this, 'SimilarityEmbeddingsEc2SecurityGroup', { vpc });
+        security_group.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22));
+
+        const ec2MountInstance = new ec2.Instance(this, 'SimilarityEmbeddingsEc2Instance', {
+            instanceType: ec2.InstanceType.of(InstanceClass.ARM1, InstanceSize.MEDIUM),
+            machineImage: ec2.MachineImage.latestAmazonLinux({
+                cpuType: AmazonLinuxCpuType.ARM_64,
+                generation: AmazonLinuxGeneration.AMAZON_LINUX_2
+            }),
+            availabilityZone: 'eu-west-1b',
+            vpc,
+            securityGroup: security_group,
+            vpcSubnets: {
+                subnetType: SubnetType.PUBLIC
+            },
+            keyName: 'similarity-embedding-ec2'
         });
 
         const efsSecurityGroup = new ec2.SecurityGroup(this, 'SimilarityEfsEmbeddingSecurityGroup', {
@@ -30,6 +45,8 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
             removalPolicy: cdk.RemovalPolicy.DESTROY,
             securityGroup: efsSecurityGroup
         });
+
+        fs.connections.allowDefaultPortFrom(ec2MountInstance);
 
         const accessPoint = fs.addAccessPoint('SimilarityEmbeddingLambdaAccessPoint', {
             path: '/sentence_transformers',
@@ -48,21 +65,16 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
             vpc
         });
 
-        const createEmbeddingHandler = new lambda.DockerImageFunction(this, 'CreateEmbeddingLambdaSimilarityEmbedding', {
-            code: lambda.DockerImageCode.fromImageAsset(
-                path.join(__dirname, '../lambdas'),
-                {
-                    cmd: ["create_embedding.index.handler"]
-                }
-            ),
+        const createEmbeddingHandler = new lambda.Function(this, 'CreateSimilarityEmbeddingLambda', {
+            code: Code.fromAsset(path.join(__dirname, '../lambdas')),
+            handler: "create_embedding.handler",
+            runtime: Runtime.PYTHON_3_9,
             memorySize: 2048,
-            timeout: Duration.minutes(15),
+            timeout: Duration.minutes(1),
             architecture: lambda.Architecture.ARM_64,
             securityGroups: [lambdaSecurityGroup],
             filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
-            vpc,
+            vpc
         });
-
-        bucket.grantRead(createEmbeddingHandler);
     }
 }

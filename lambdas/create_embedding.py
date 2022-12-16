@@ -2,38 +2,16 @@ import os
 import sys
 import json
 import zipfile
-import boto3
-
-s3_client = boto3.client("s3")
 
 path = '/mnt/filesystem'
 
-def save_zip(zip_key, directory, from_bucket):
-    output_path = f'{path}/{directory}'
-    zip_path = f'{path}/{zip_key}'
+python_pkg_path = os.path.join(path, "python/lib64/python3.9/site-packages")
 
-    try:
-        os.mkdir(output_path)
-    except FileExistsError:
-        pass
+sys.path.append(python_pkg_path)
 
-    s3_client.download_file(from_bucket, zip_key, zip_path)
-
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(output_path)
-
-
-def install_sentence_transformers():
-    bucket = 'similarity-embeddings'
-    save_zip("sentence_transformers_lib.zip", "python", bucket)
-    save_zip("msmarco-distilbert-cos-v5-model.zip", "model", bucket)
-
-# Todo: Create standalone lambdas to install package and model, also for removing/updating
-# Note: uncomment to install
-# install_sentence_transformers()
-
-sys.path.append(f"{path}/python/sentence_transformers_lib")
 from sentence_transformers import SentenceTransformer, util
+
+model = SentenceTransformer(f'{path}/msmarco-distilbert-cos-v5-model')
 
 def handler(event, context):
     query = "A significant proportion of alcoholics manage to live with the disease daily"
@@ -53,5 +31,4 @@ def handler(event, context):
     return {
         "statusCode": 200,
         "body": json.dumps({"doc_score_pairs": doc_score_pairs})
-#         "body": "DONE"
     }
