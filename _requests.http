@@ -2,7 +2,7 @@ POST https://neuqmtn8ed.execute-api.eu-west-1.amazonaws.com/prod/all-mpnet-base-
 Content-Type: application/json
 
 {
-  "texts": ["One flame-winged brought a white-winged harp-player Even where my lady and I lay all alone; Saying: ‘Behold this minstrel is unknown; Bid him depart, for I am minstrel here: Only my songs are to love's dear ones dear.’ Then said I ‘Through thine hautboy's rapturous tone Unto my lady still this harp makes moan, And still she deems the cadence deep and clear.’ Then said my lady: ‘Thou art passion of Love, And this Love's worship: both he plights to me. Thy mastering music walks the sunlit sea: But where wan water trembles in the grove, And the wan moon is all the light thereof, This harp still makes my name its voluntary.’"]
+  "texts": ["Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage.Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage.Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage."]
 }
 
 ###
@@ -11,7 +11,7 @@ POST https://neuqmtn8ed.execute-api.eu-west-1.amazonaws.com/prod/msmarco-distilb
 Content-Type: application/json
 
 {
-  "texts": ["One flame-winged brought a white-winged harp-player Even where my lady and I lay all alone; Saying: ‘Behold this minstrel is unknown; Bid him depart, for I am minstrel here: Only my songs are to love's dear ones dear.’ Then said I ‘Through thine hautboy's rapturous tone Unto my lady still this harp makes moan, And still she deems the cadence deep and clear.’ Then said my lady: ‘Thou art passion of Love, And this Love's worship: both he plights to me. Thy mastering music walks the sunlit sea: But where wan water trembles in the grove, And the wan moon is all the light thereof, This harp still makes my name its voluntary.’"]
+  "texts": ["Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage."]
 }
 
 ###
@@ -20,7 +20,7 @@ POST https://neuqmtn8ed.execute-api.eu-west-1.amazonaws.com/prod/multi-qa-distil
 Content-Type: application/json
 
 {
-  "texts": ["One flame-winged brought a white-winged harp-player Even where my lady and I lay all alone; Saying: ‘Behold this minstrel is unknown; Bid him depart, for I am minstrel here: Only my songs are to love's dear ones dear.’ Then said I ‘Through thine hautboy's rapturous tone Unto my lady still this harp makes moan, And still she deems the cadence deep and clear.’ Then said my lady: ‘Thou art passion of Love, And this Love's worship: both he plights to me. Thy mastering music walks the sunlit sea: But where wan water trembles in the grove, And the wan moon is all the light thereof, This harp still makes my name its voluntary.’"]
+  "texts": ["Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage."]
 }
 
 ###
@@ -29,7 +29,7 @@ POST https://neuqmtn8ed.execute-api.eu-west-1.amazonaws.com/prod/multi-qa-MiniLM
 Content-Type: application/json
 
 {
-  "texts": ["One flame-winged brought a white-winged harp-player Even where my lady and I lay all alone; Saying: ‘Behold this minstrel is unknown; Bid him depart, for I am minstrel here: Only my songs are to love's dear ones dear.’ Then said I ‘Through thine hautboy's rapturous tone Unto my lady still this harp makes moan, And still she deems the cadence deep and clear.’ Then said my lady: ‘Thou art passion of Love, And this Love's worship: both he plights to me. Thy mastering music walks the sunlit sea: But where wan water trembles in the grove, And the wan moon is all the light thereof, This harp still makes my name its voluntary.’"]
+  "texts": ["Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage."]
 }
 
 ###
@@ -38,7 +38,7 @@ POST https://neuqmtn8ed.execute-api.eu-west-1.amazonaws.com/prod/multi-qa-mpnet-
 Content-Type: application/json
 
 {
-  "texts": ["One flame-winged brought a white-winged harp-player Even where my lady and I lay all alone; Saying: ‘Behold this minstrel is unknown; Bid him depart, for I am minstrel here: Only my songs are to love's dear ones dear.’ Then said I ‘Through thine hautboy's rapturous tone Unto my lady still this harp makes moan, And still she deems the cadence deep and clear.’ Then said my lady: ‘Thou art passion of Love, And this Love's worship: both he plights to me. Thy mastering music walks the sunlit sea: But where wan water trembles in the grove, And the wan moon is all the light thereof, This harp still makes my name its voluntary.’"]
+  "texts": ["Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage."]
 }
 
 ###
@@ -47,7 +47,16 @@ POST https://neuqmtn8ed.execute-api.eu-west-1.amazonaws.com/prod/multi-qa-mpnet-
 Content-Type: application/json
 
 {
-  "texts": ["One flame-winged brought a white-winged harp-player Even where my lady and I lay all alone; Saying: ‘Behold this minstrel is unknown; Bid him depart, for I am minstrel here: Only my songs are to love's dear ones dear.’ Then said I ‘Through thine hautboy's rapturous tone Unto my lady still this harp makes moan, And still she deems the cadence deep and clear.’ Then said my lady: ‘Thou art passion of Love, And this Love's worship: both he plights to me. Thy mastering music walks the sunlit sea: But where wan water trembles in the grove, And the wan moon is all the light thereof, This harp still makes my name its voluntary.’"]
+  "texts": ["Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage."]
+}
+
+###
+
+POST https://neuqmtn8ed.execute-api.eu-west-1.amazonaws.com/prod/all-MiniLM-L6-v2
+Content-Type: application/json
+
+{
+  "texts": ["Twinge of oat milk and honey on the nose. Great concentration and drive on the palate. Impressively harmonious and long. Impressive complexity from late summer through to autumn, which ensures a well-rounded character with distinguished hints of almond. The 2022 vintage will be remembered as one of great balance and harmony, with remarkable intensity that was driven by dry summer conditions during harvest. A remarkable vintage."]
 }
 
 ###

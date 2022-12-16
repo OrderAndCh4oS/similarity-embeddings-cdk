@@ -16,7 +16,7 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
             availabilityZones: ['eu-west-1b']
         });
 
-        const security_group = new ec2.SecurityGroup(this, 'SimilarityEmbeddingsEc2SecurityGroup', { vpc });
+        const security_group = new ec2.SecurityGroup(this, 'SimilarityEmbeddingsEc2SecurityGroup', {vpc});
         security_group.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22));
 
         const ec2MountInstance = new ec2.Instance(this, 'SimilarityEmbeddingsEc2Instance', {
@@ -65,9 +65,8 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
             vpc
         });
 
-        const createMsMarcoDistilBertCosV5EmbeddingHandler = new lambda.Function(this, 'CreateMsMarcoDistilBertCosV5EmbeddingLambda', {
+        const lambdaConfig = {
             code: lambda.Code.fromAsset(path.join(__dirname, '../lambdas')),
-            handler: "msmarco-distilbert-cos-v5-model.handler",
             runtime: lambda.Runtime.PYTHON_3_9,
             memorySize: 8192,
             timeout: Duration.minutes(1),
@@ -75,66 +74,48 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
             securityGroups: [lambdaSecurityGroup],
             filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
             vpc
+        }
+
+        const createMsMarcoDistilBertCosV5EmbeddingHandler = new lambda.Function(this, 'CreateMsMarcoDistilBertCosV5EmbeddingLambda', {
+            handler: "create-embedding.handler",
+            environment: {MODEL_NAME: 'msmarco-distilbert-cos-v5-model'},
+            ...lambdaConfig
         });
 
         const createAllMpNetBaseV2EmbeddingHandler = new lambda.Function(this, 'CreateAllMpNetBaseV2EmbeddingLambda', {
-            code: lambda.Code.fromAsset(path.join(__dirname, '../lambdas')),
-            handler: "all-mpnet-base-v2.handler",
-            runtime: lambda.Runtime.PYTHON_3_9,
-            memorySize: 8192,
-            timeout: Duration.minutes(1),
-            architecture: lambda.Architecture.ARM_64,
-            securityGroups: [lambdaSecurityGroup],
-            filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
-            vpc
+            handler: "create-embedding.handler",
+            environment: {MODEL_NAME: 'all-mpnet-base-v2'},
+            ...lambdaConfig
         });
 
         const createMultiQaDistilBertCosV1EmbeddingHandler = new lambda.Function(this, 'CreateMultiQaDistilBertCosV1EmbeddingLambda', {
-            code: lambda.Code.fromAsset(path.join(__dirname, '../lambdas')),
-            handler: "multi-qa-distilbert-cos-v1.handler",
-            runtime: lambda.Runtime.PYTHON_3_9,
-            memorySize: 8192,
-            timeout: Duration.minutes(1),
-            architecture: lambda.Architecture.ARM_64,
-            securityGroups: [lambdaSecurityGroup],
-            filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
-            vpc
+            handler: "create-embedding.handler",
+            environment: {MODEL_NAME: 'multi-qa-distilbert-cos-v1'},
+            ...lambdaConfig
         });
 
         const createMultiQaMiniLmL6CosV1EmbeddingHandler = new lambda.Function(this, 'CreateMultiQaMiniLmL6CosV1EmbeddingLambda', {
-            code: lambda.Code.fromAsset(path.join(__dirname, '../lambdas')),
-            handler: "multi-qa-MiniLM-L6-cos-v1.handler",
-            runtime: lambda.Runtime.PYTHON_3_9,
-            memorySize: 8192,
-            timeout: Duration.minutes(1),
-            architecture: lambda.Architecture.ARM_64,
-            securityGroups: [lambdaSecurityGroup],
-            filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
-            vpc
+            handler: "create-embedding.handler",
+            environment: {MODEL_NAME: 'multi-qa-MiniLM-L6-cos-v1'},
+            ...lambdaConfig
         });
 
         const createMultiQaMpNetBaseCosV1EmbeddingHandler = new lambda.Function(this, 'CreateMultiQaMpNetBaseCosV1EmbeddingLambda', {
-            code: lambda.Code.fromAsset(path.join(__dirname, '../lambdas')),
-            handler: "multi-qa-mpnet-base-cos-v1.handler",
-            runtime: lambda.Runtime.PYTHON_3_9,
-            memorySize: 8192,
-            timeout: Duration.minutes(1),
-            architecture: lambda.Architecture.ARM_64,
-            securityGroups: [lambdaSecurityGroup],
-            filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
-            vpc
+            handler: "create-embedding.handler",
+            environment: {MODEL_NAME: 'multi-qa-mpnet-base-cos-v1'},
+            ...lambdaConfig
         });
 
         const createMultiQaMpNetBaseDotV1EmbeddingHandler = new lambda.Function(this, 'CreateMultiQaMpNetBaseDotV1EmbeddingLambda', {
-            code: lambda.Code.fromAsset(path.join(__dirname, '../lambdas')),
-            handler: "multi-qa-mpnet-base-dot-v1.handler",
-            runtime: lambda.Runtime.PYTHON_3_9,
-            memorySize: 8192,
-            timeout: Duration.minutes(1),
-            architecture: lambda.Architecture.ARM_64,
-            securityGroups: [lambdaSecurityGroup],
-            filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/filesystem'),
-            vpc
+            handler: "create-embedding.handler",
+            environment: {MODEL_NAME: 'multi-qa-mpnet-base-dot-v1'},
+            ...lambdaConfig
+        });
+
+        const createAllMiniLmL6EmbeddingHandler = new lambda.Function(this, 'CreateAllMiniLmL6EmbeddingLambda', {
+            handler: "create-embedding.handler",
+            environment: {MODEL_NAME: 'all-MiniLM-L6-v2'},
+            ...lambdaConfig
         });
 
         const api = new apigateway.RestApi(this, 'SimilarityEmbeddingApi', {
@@ -144,23 +125,17 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
                 allowOrigins: apigateway.Cors.ALL_ORIGINS
             },
         });
+        const makeMethod = (model: string, handler: lambda.Function) => {
+            api.root.addResource(model)
+                .addMethod('post', new apigateway.LambdaIntegration(handler));
+        }
 
-        api.root.addResource('multi-qa-mpnet-base-dot-v1')
-            .addMethod('post', new apigateway.LambdaIntegration(createMultiQaMpNetBaseDotV1EmbeddingHandler));
-
-        api.root.addResource('multi-qa-mpnet-base-cos-v1')
-            .addMethod('post', new apigateway.LambdaIntegration(createMultiQaMpNetBaseCosV1EmbeddingHandler));
-
-        api.root.addResource('multi-qa-MiniLM-L6-cos-v1')
-            .addMethod('post', new apigateway.LambdaIntegration(createMultiQaMiniLmL6CosV1EmbeddingHandler));
-
-        api.root.addResource('multi-qa-distilbert-cos-v1')
-            .addMethod('post', new apigateway.LambdaIntegration(createMultiQaDistilBertCosV1EmbeddingHandler));
-
-        api.root.addResource('all-mpnet-base-v2')
-            .addMethod('post', new apigateway.LambdaIntegration(createAllMpNetBaseV2EmbeddingHandler));
-
-        api.root.addResource('msmarco-distilbert-cos-v5-model')
-            .addMethod('post', new apigateway.LambdaIntegration(createMsMarcoDistilBertCosV5EmbeddingHandler));
+        makeMethod('multi-qa-mpnet-base-dot-v1', createMultiQaMpNetBaseDotV1EmbeddingHandler);
+        makeMethod('multi-qa-mpnet-base-cos-v1', createMultiQaMpNetBaseCosV1EmbeddingHandler);
+        makeMethod('multi-qa-MiniLM-L6-cos-v1', createMultiQaMiniLmL6CosV1EmbeddingHandler);
+        makeMethod('multi-qa-distilbert-cos-v1', createMultiQaDistilBertCosV1EmbeddingHandler);
+        makeMethod('all-mpnet-base-v2', createAllMpNetBaseV2EmbeddingHandler);
+        makeMethod('msmarco-distilbert-cos-v5-model', createMsMarcoDistilBertCosV5EmbeddingHandler);
+        makeMethod('all-MiniLM-L6-v2', createAllMiniLmL6EmbeddingHandler);
     }
 }

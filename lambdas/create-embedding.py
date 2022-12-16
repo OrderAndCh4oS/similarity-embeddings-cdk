@@ -3,6 +3,8 @@ import sys
 import json
 import zipfile
 
+model_name = os.environ["MODEL_NAME"]
+
 path = '/mnt/filesystem'
 
 python_pkg_path = os.path.join(path, "python/lib64/python3.9/site-packages")
@@ -11,7 +13,7 @@ sys.path.append(python_pkg_path)
 
 from sentence_transformers import SentenceTransformer, util
 
-model = SentenceTransformer(f'{path}/models/multi-qa-mpnet-base-cos-v1')
+model = SentenceTransformer(f'{path}/models/{model_name}')
 
 def handler(event, context):
     body = json.loads(event["body"])
