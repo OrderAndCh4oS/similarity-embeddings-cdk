@@ -11,7 +11,7 @@ sys.path.append(python_pkg_path)
 
 from sentence_transformers import SentenceTransformer, util
 
-model = SentenceTransformer(f'{path}/msmarco-distilbert-cos-v5-model')
+model = SentenceTransformer(f'{path}/models/msmarco-distilbert-cos-v5-model')
 
 def handler(event, context):
     body = json.loads(event["body"])

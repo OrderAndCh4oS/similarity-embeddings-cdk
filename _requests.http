@@ -2,7 +2,7 @@ POST https://ekaqal83p8.execute-api.eu-west-1.amazonaws.com/prod/create-embeddin
 Content-Type: application/json
 
 {
-  "text": "I'm so, so tired and peaceful until"
+  "text": "One flame-winged brought a white-winged harp-player Even where my lady and I lay all alone; Saying: ‘Behold this minstrel is unknown; Bid him depart, for I am minstrel here: Only my songs are to love's dear ones dear.’ Then said I ‘Through thine hautboy's rapturous tone Unto my lady still this harp makes moan, And still she deems the cadence deep and clear.’ Then said my lady: ‘Thou art passion of Love, And this Love's worship: both he plights to me. Thy mastering music walks the sunlit sea: But where wan water trembles in the grove, And the wan moon is all the light thereof, This harp still makes my name its voluntary.’"
 }
 
 ###

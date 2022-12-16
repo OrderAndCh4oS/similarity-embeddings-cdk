@@ -1,13 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
 import {Duration} from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import {AmazonLinuxCpuType, AmazonLinuxGeneration, InstanceClass, InstanceSize, SubnetType} from 'aws-cdk-lib/aws-ec2';
 import * as efs from 'aws-cdk-lib/aws-efs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import {Code, Runtime} from 'aws-cdk-lib/aws-lambda';
+import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import {Construct} from 'constructs';
 import * as path from "path";
-import {Cors, LambdaIntegration, RestApi} from "aws-cdk-lib/aws-apigateway";
+import {readFileSync} from "fs";
 
 export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -21,19 +20,19 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
         security_group.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(22));
 
         const ec2MountInstance = new ec2.Instance(this, 'SimilarityEmbeddingsEc2Instance', {
-            instanceType: ec2.InstanceType.of(InstanceClass.ARM1, InstanceSize.MEDIUM),
+            instanceType: ec2.InstanceType.of(ec2.InstanceClass.ARM1, ec2.InstanceSize.MEDIUM),
             machineImage: ec2.MachineImage.latestAmazonLinux({
-                cpuType: AmazonLinuxCpuType.ARM_64,
-                generation: AmazonLinuxGeneration.AMAZON_LINUX_2
+                cpuType: ec2.AmazonLinuxCpuType.ARM_64,
+                generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2
             }),
             availabilityZone: 'eu-west-1b',
             vpc,
             securityGroup: security_group,
-            vpcSubnets: {
-                subnetType: SubnetType.PUBLIC
-            },
+            vpcSubnets: {subnetType: ec2.SubnetType.PUBLIC},
             keyName: 'similarity-embedding-ec2'
         });
+
+        ec2MountInstance.addUserData(readFileSync(path.join(__dirname, '../scripts/ec2-init.sh'), 'utf8'));
 
         const efsSecurityGroup = new ec2.SecurityGroup(this, 'SimilarityEfsEmbeddingSecurityGroup', {
             vpc
@@ -42,9 +41,9 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
         const fs = new efs.FileSystem(this, 'EfsSimilarityEmbedding', {
             vpc: vpc,
             performanceMode: efs.PerformanceMode.GENERAL_PURPOSE,
-            throughputMode: efs.ThroughputMode.BURSTING,
+            throughputMode: efs.ThroughputMode.ELASTIC,
             removalPolicy: cdk.RemovalPolicy.DESTROY,
-            securityGroup: efsSecurityGroup
+            securityGroup: efsSecurityGroup,
         });
 
         fs.connections.allowDefaultPortFrom(ec2MountInstance);
@@ -67,10 +66,10 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
         });
 
         const createEmbeddingHandler = new lambda.Function(this, 'CreateSimilarityEmbeddingLambda', {
-            code: Code.fromAsset(path.join(__dirname, '../lambdas')),
+            code: lambda.Code.fromAsset(path.join(__dirname, '../lambdas')),
             handler: "create_embedding.handler",
-            runtime: Runtime.PYTHON_3_9,
-            memorySize: 2048,
+            runtime: lambda.Runtime.PYTHON_3_9,
+            memorySize: 8192,
             timeout: Duration.minutes(1),
             architecture: lambda.Architecture.ARM_64,
             securityGroups: [lambdaSecurityGroup],
@@ -78,15 +77,15 @@ export class SimilarityEmbeddingsCdkStack extends cdk.Stack {
             vpc
         });
 
-        const api = new RestApi(this, 'AnnCache_Api', {
+        const api = new apigateway.RestApi(this, 'SimilarityEmbeddingApi', {
             defaultCorsPreflightOptions: {
-                allowHeaders: Cors.DEFAULT_HEADERS,
-                allowMethods: Cors.ALL_METHODS,
-                allowOrigins: Cors.ALL_ORIGINS
+                allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+                allowMethods: apigateway.Cors.ALL_METHODS,
+                allowOrigins: apigateway.Cors.ALL_ORIGINS
             },
         });
 
         const createEmbeddingResource = api.root.addResource('create-embedding');
-        createEmbeddingResource.addMethod('post', new LambdaIntegration(createEmbeddingHandler));
+        createEmbeddingResource.addMethod('post', new apigateway.LambdaIntegration(createEmbeddingHandler));
     }
 }
